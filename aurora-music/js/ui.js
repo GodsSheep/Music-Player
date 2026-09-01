@@ -546,7 +546,7 @@ class UIController {
     }, { passive: true });
   }
 
-  switchView(view) {
+  async switchView(view) {
     this.currentView = view;
 
     this.elements.navItems.forEach(item => {
