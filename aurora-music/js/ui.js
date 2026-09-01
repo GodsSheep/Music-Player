@@ -16,6 +16,7 @@ class UIController {
     this.cacheElements();
     this.setupEventListeners();
     this.setupPlayerListeners();
+    this.setupSwipeGestures();
   }
 
   cacheElements() {
@@ -96,10 +97,21 @@ class UIController {
       });
     });
 
-    // Import
-    this.elements.importFilesBtn.addEventListener('click', () => {
-      this.elements.fileInput.click();
-    });
+    // Import - file input
+      this.elements.importFilesBtn.addEventListener('click', (e) => {
+        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+          this.elements.folderInput.click();
+        } else {
+          this.elements.fileInput.click();
+        }
+      });
+
+      this.elements.importFolderBtn = document.getElementById('import-folder-btn');
+      if (this.elements.importFolderBtn) {
+        this.elements.importFolderBtn.addEventListener('click', () => {
+          this.elements.folderInput.click();
+        });
+      }
 
     this.elements.fileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
@@ -108,8 +120,20 @@ class UIController {
       }
     });
 
-    // Folder import
-    this.elements.dropZone.addEventListener('dragover', (e) => {
+    // Folder import via webkitdirectory
+    this.elements.folderInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        this.handleImport(e.target.files);
+        e.target.value = '';
+      }
+    });
+
+    // Drop zone - click to import
+    this.elements.dropZone.addEventListener('click', (e) => {
+      if (e.target === this.elements.dropZone || this.elements.dropZone.contains(e.target)) {
+        this.elements.fileInput.click();
+      }
+    });
       e.preventDefault();
       this.elements.dropZone.classList.add('dragover');
     });
@@ -251,20 +275,66 @@ class UIController {
     let isDragging = false;
     this.elements.progressBar.addEventListener('touchstart', (e) => {
       isDragging = true;
-    });
+      this.updateProgressFromTouch(e);
+    }, { passive: false });
 
     this.elements.progressBar.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
-      const touch = e.touches[0];
-      const rect = this.elements.progressBar.getBoundingClientRect();
-      const percent = (touch.clientX - rect.left) / rect.width;
-      const duration = this.player.getProgress().duration;
-      this.player.seek(percent * duration);
-    });
+      e.preventDefault();
+      this.updateProgressFromTouch(e);
+    }, { passive: false });
 
     this.elements.progressBar.addEventListener('touchend', () => {
       isDragging = false;
     });
+  }
+
+  updateProgressFromTouch(e) {
+    const touch = e.touches[0];
+    const rect = this.elements.progressBar.getBoundingClientRect();
+    const percent = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+    const duration = this.player.getProgress().duration;
+    this.player.seek(percent * duration);
+  }
+
+  setupSwipeGestures() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    const container = document.getElementById('main-content');
+
+    container.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+    }, { passive: true });
+  }
+
+  handleSwipe(startX, startY, endX, endY) {
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+
+    // Horizontal swipe
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+      if (diffX > 0) {
+        // Swipe right - previous track
+        if (this.player.getCurrentTrack()) {
+          this.player.prev();
+        }
+      } else {
+        // Swipe left - next track
+        if (this.player.getCurrentTrack()) {
+          this.player.next();
+        }
+      }
+    }
   }
 
   setupPlayerListeners() {
@@ -414,7 +484,6 @@ class UIController {
   }
 
   renderPlaylists() {
-    // Placeholder - would render actual playlists
     this.elements.playlistsEmpty.classList.remove('hidden');
   }
 
@@ -636,8 +705,8 @@ class UIController {
         const barHeight = (dataArray[i] / 255) * canvas.height;
 
         const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
-        gradient.addColorStop(1, 'rgba(139, 92, 246, 0.8)');
+        gradient.addColorStop(0, 'rgba(124, 92, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(255, 92, 172, 0.8)');
 
         ctx.fillStyle = gradient;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
@@ -743,4 +812,4 @@ class UIController {
   }
 }
 
-// UIController ready for use
+export default UIController;

@@ -15,15 +15,19 @@ class AuroraMusicApp {
 
   async init() {
     try {
-      // Global error handling
+      // Global error handling - prevent crashes
       window.addEventListener('error', (event) => {
         console.error('Global error:', event.error);
-        this.showToast('An unexpected error occurred', 'error');
+        if (this.ui) {
+          this.ui.showToast('An unexpected error occurred', 'error');
+        }
       });
 
       window.addEventListener('unhandledrejection', (event) => {
         console.error('Unhandled rejection:', event.reason);
-        this.showToast('An unexpected error occurred', 'error');
+        if (this.ui) {
+          this.ui.showToast('An unexpected error occurred', 'error');
+        }
       });
 
       // Initialize database
@@ -56,7 +60,7 @@ class AuroraMusicApp {
       await this.restorePlayback();
 
       // Register service worker
-      this.registerServiceWorker();
+      await this.registerServiceWorker();
 
       // Set initial volume
       this.player.setVolume(0.8);
@@ -66,8 +70,30 @@ class AuroraMusicApp {
 
     } catch (error) {
       console.error('Failed to initialize app:', error);
-      this.showToast('Failed to initialize app', 'error');
+      // Fallback: create minimal UI if full init fails
+      this.showFallbackError(error);
     }
+  }
+
+  showFallbackError(error) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-error';
+    toast.innerHTML = `<strong>Initialization Error</strong><br><small>${this.escapeHtml(error.message)}</small>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   async restorePlayback() {
@@ -92,27 +118,15 @@ class AuroraMusicApp {
       }
     }
   }
-
-  showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
-  }
 }
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const app = new AuroraMusicApp();
+    app.init();
+  });
+} else {
   const app = new AuroraMusicApp();
   app.init();
-});
-
-// AuroraMusicApp ready for use
+}
