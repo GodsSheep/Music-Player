@@ -180,6 +180,10 @@ class Library {
     return this.tracks.filter(t => t.favorite);
   }
 
+  async getPlaylists() {
+    return this.db.getPlaylists();
+  }
+
   async getRecentlyPlayed(limit = 50) {
     return this.tracks
       .filter(t => t.lastPlayed)

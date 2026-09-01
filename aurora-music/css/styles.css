@@ -1787,9 +1787,10 @@ button { font-family: inherit; font-size: inherit; }
 }
 
 .eq-slider {
-  writing-mode: bt-lr;
-  -webkit-appearance: slider-vertical;
-  appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: none;
+  appearance: none;
   width: 8px;
   height: 120px;
   background: rgba(255, 255, 255, 0.08);
@@ -1839,6 +1840,31 @@ button { font-family: inherit; font-size: inherit; }
 .settings-list::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.settings-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.settings-quick {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.settings-quick .btn {
+  flex: 1;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Responsive Now Playing */

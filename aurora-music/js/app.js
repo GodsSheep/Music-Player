@@ -113,6 +113,11 @@ class AuroraMusicApp {
     }
   }
 
+  scheduleSaveSettings() {
+    if (this._saveTimer) clearTimeout(this._saveTimer);
+    this._saveTimer = setTimeout(() => this.saveSettings(), 600);
+  }
+
   applyEQ() {
     if (!this.audio || !this.audio.audioContext) return;
 

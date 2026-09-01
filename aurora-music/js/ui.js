@@ -115,7 +115,11 @@ class UIController {
         blurValue: document.getElementById('blur-value'),
         outputSelect: document.getElementById('output-select'),
         sampleRateSelect: document.getElementById('sample-rate-select')
-      }
+      },
+      quickWallpaper: document.getElementById('quick-wallpaper'),
+      quickTheme: document.getElementById('quick-theme'),
+      saveSettingsBtn: document.getElementById('save-settings-btn'),
+      restoreDefaultsBtn: document.getElementById('restore-defaults-btn')
     };
   }
 
@@ -410,44 +414,53 @@ class UIController {
   setupSettingsListeners() {
     const s = this.elements.settingsElements;
 
+    const save = () => { if (this.app) this.app.scheduleSaveSettings(); };
+
     s.crossfadeSlider?.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
       s.crossfadeValue.textContent = val + 's';
       if (this.app) this.app.settings.crossfade = val;
+      save();
     });
 
     s.normalizeToggle?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.normalize = e.target.checked;
+      save();
     });
 
     s.gaplessToggle?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.gapless = e.target.checked;
+      save();
     });
 
     s.wallpaperSelect?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.wallpaper = e.target.value;
       this.updateNowPlayingBackground();
+      save();
     });
 
     s.visualizationSelect?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.visualization = e.target.value;
+      save();
     });
 
     s.lyricsToggle?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.showLyrics = e.target.checked;
+      save();
     });
 
     s.themeSelect?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.theme = e.target.value;
+      save();
     });
 
     s.blurSlider?.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
       s.blurValue.textContent = val + '%';
       if (this.app) this.app.settings.blur = val;
+      save();
     });
 
-    // EQ sliders
     document.querySelectorAll('.eq-slider').forEach((slider, i) => {
       slider.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
@@ -455,24 +468,82 @@ class UIController {
           this.app.settings.eq[i] = val;
           this.app.applyEQ();
         }
+        save();
       });
     });
 
-    // EQ presets
     document.querySelectorAll('.eq-preset').forEach(btn => {
       btn.addEventListener('click', () => {
         const preset = btn.dataset.preset;
         this.applyEQPreset(preset);
+        save();
       });
     });
 
-    // Color picker
     document.querySelectorAll('.color-option').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         if (this.app) this.app.settings.accentColor = btn.dataset.color;
+        save();
       });
+    });
+
+    document.getElementById('quick-wallpaper')?.addEventListener('click', () => {
+      const wallpapers = ['gradient', 'artwork', 'waveform', 'solid', 'particles'];
+      const current = this.app?.settings.wallpaper || 'gradient';
+      const next = wallpapers[(wallpapers.indexOf(current) + 1) % wallpapers.length];
+      if (this.app) {
+        this.app.settings.wallpaper = next;
+        const select = document.getElementById('wallpaper-select');
+        if (select) select.value = next;
+        this.updateNowPlayingBackground();
+        this.showToast(`Wallpaper: ${next}`, 'info');
+        save();
+      }
+    });
+
+    document.getElementById('quick-theme')?.addEventListener('click', () => {
+      const themes = ['dark', 'light', 'auto'];
+      const current = this.app?.settings.theme || 'dark';
+      const next = themes[(themes.indexOf(current) + 1) % themes.length];
+      if (this.app) {
+        this.app.settings.theme = next;
+        const select = document.getElementById('theme-select');
+        if (select) select.value = next;
+        this.showToast(`Theme: ${next}`, 'info');
+        save();
+      }
+    });
+
+    document.getElementById('save-settings-btn')?.addEventListener('click', async () => {
+      if (this.app) {
+        await this.app.saveSettings();
+        this.showToast('Settings saved', 'success');
+      }
+    });
+
+    document.getElementById('restore-defaults-btn')?.addEventListener('click', async () => {
+      if (!this.app) return;
+      this.app.settings = {
+        crossfade: 0,
+        normalize: false,
+        gapless: true,
+        eq: [0, 0, 0, 0, 0],
+        wallpaper: 'gradient',
+        visualization: 'bars',
+        showLyrics: false,
+        theme: 'dark',
+        accentColor: '#0a84ff',
+        blur: 60,
+        outputDevice: 'default',
+        sampleRate: 44100
+      };
+      await this.app.saveSettings();
+      this.renderSettings();
+      this.app.applyEQ();
+      this.updateNowPlayingBackground();
+      this.showToast('Defaults restored', 'success');
     });
   }
 
@@ -587,7 +658,7 @@ class UIController {
         break;
       case 'favorites':
         this.elements.favoritesView.classList.add('active');
-        this.renderFavorites();
+        await this.renderFavorites();
         break;
       case 'playlists':
         this.elements.playlistsView.classList.add('active');
@@ -608,7 +679,7 @@ class UIController {
         this.renderLibrary();
         break;
       case 'favorites':
-        this.renderFavorites();
+        await this.renderFavorites();
         break;
       case 'playlists':
         await this.renderPlaylists();
@@ -641,8 +712,8 @@ class UIController {
     this.attachTrackListeners(this.elements.libraryList);
   }
 
-  renderFavorites() {
-    const favorites = this.library.getFavorites();
+  async renderFavorites() {
+    const favorites = await this.library.getFavorites();
 
     if (favorites.length === 0) {
       this.elements.favoritesList.innerHTML = '';
@@ -692,7 +763,6 @@ class UIController {
   }
 
   renderSettings() {
-    // Settings are rendered in HTML, just sync with current values
     if (!this.app) return;
 
     const s = this.app.settings;
@@ -708,6 +778,14 @@ class UIController {
     if (els.themeSelect) els.themeSelect.value = s.theme;
     if (els.blurSlider) els.blurSlider.value = s.blur;
     if (els.blurValue) els.blurValue.textContent = s.blur + '%';
+
+    document.querySelectorAll('.eq-slider').forEach((slider, i) => {
+      slider.value = s.eq[i] || 0;
+    });
+
+    document.querySelectorAll('.color-option').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.color === s.accentColor);
+    });
   }
 
   createTrackHTML(track) {
