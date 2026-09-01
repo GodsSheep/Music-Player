@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aurora Music">
+  <meta name="description" content="Aurora Music - Modern local audio player">
+  <title>Aurora Music</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+          <span>Aurora Music</span>
+        </div>
+        <button id="sidebar-close" class="icon-btn" aria-label="Close sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" data-view="library" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span>Library</span>
+        </a>
+        <a href="#" data-view="favorites" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span>Favorites</span>
+        </a>
+        <a href="#" data-view="playlists" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15V6"/>
+            <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+            <path d="M12 12H3"/>
+            <path d="M16 6H3"/>
+            <path d="M12 18H3"/>
+          </svg>
+          <span>Playlists</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="import-files-btn" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Import Music
+        </button>
+        <input type="file" id="file-input" multiple accept="audio/*" hidden>
+        <input type="file" id="folder-input" webkitdirectory directory hidden>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+      <!-- Header -->
+      <header class="top-bar">
+        <button id="sidebar-toggle" class="icon-btn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search songs, artists, albums..." autocomplete="off">
+        </div>
+        <button id="add-to-queue-btn" class="icon-btn" aria-label="Add to queue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Views -->
+      <div id="views-container">
+        <!-- Library View -->
+        <section id="library-view" class="view active">
+          <div class="view-header">
+            <h1>Library</h1>
+            <div class="view-actions">
+              <button id="sort-btn" class="btn btn-ghost" aria-label="Sort">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M7 12h10M10 18h4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-content">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>Drag & drop audio files or folders here</p>
+              <span>or click Import Music</span>
+            </div>
+          </div>
+          <div id="library-list" class="track-list"></div>
+          <div id="library-empty" class="empty-state hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+            <h3>No music yet</h3>
+            <p>Import audio files to start listening</p>
+          </div>
+        </section>
+
+        <!-- Favorites View -->
+        <section id="favorites-view" class="view">
+          <div class="view-header">
+            <h1>Favorites</h1>
+          </div>
+          <div id="favorites-list" class="track-list"></div>
+          <div id="favorites-empty" class="empty-state hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <h3>No favorites</h3>
+            <p>Mark songs as favorites to see them here</p>
+          </div>
+        </section>
+
+        <!-- Playlists View -->
+        <section id="playlists-view" class="view">
+          <div class="view-header">
+            <h1>Playlists</h1>
+            <button id="create-playlist-btn" class="btn btn-ghost" aria-label="Create playlist">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+          <div id="playlists-grid" class="playlists-grid"></div>
+          <div id="playlists-empty" class="empty-state hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15V6"/>
+              <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+              <path d="M12 12H3"/>
+              <path d="M16 6H3"/>
+              <path d="M12 18H3"/>
+            </svg>
+            <h3>No playlists</h3>
+            <p>Create a playlist to organize your music</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Queue Panel -->
+    <aside id="queue-panel" class="queue-panel">
+      <div class="queue-header">
+        <h2>Queue</h2>
+        <button id="queue-close" class="icon-btn" aria-label="Close queue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="queue-list" class="queue-list"></div>
+      <div id="queue-empty" class="empty-state hidden">
+        <p>Queue is empty</p>
+      </div>
+    </aside>
+
+    <!-- Queue Toggle (Mobile) -->
+    <button id="queue-toggle" class="queue-toggle icon-btn" aria-label="Open queue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 18h18M3 12h18M3 6h18"/>
+      </svg>
+      <span id="queue-count" class="badge">0</span>
+    </button>
+
+    <!-- Player Bar -->
+    <footer id="player-bar" class="player-bar">
+      <div class="player-track">
+        <div id="player-artwork" class="player-artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <div class="player-info">
+          <div id="player-title" class="player-title">No track selected</div>
+          <div id="player-artist" class="player-artist">-</div>
+        </div>
+        <button id="favorite-btn" class="icon-btn" aria-label="Toggle favorite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="player-controls">
+        <div class="player-buttons">
+          <button id="shuffle-btn" class="icon-btn" aria-label="Shuffle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+          </button>
+          <button id="prev-btn" class="icon-btn" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="19 20 9 12 19 4 19 20"/>
+              <line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+          </button>
+          <button id="play-btn" class="btn btn-play" aria-label="Play">
+            <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+          </button>
+          <button id="next-btn" class="icon-btn" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 4 15 12 5 20 5 4"/>
+              <line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+          </button>
+          <button id="repeat-btn" class="icon-btn" aria-label="Repeat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 1l4 4-4 4"/>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <path d="M7 23l-4-4 4-4"/>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="player-progress">
+          <span id="current-time" class="time">0:00</span>
+          <div id="progress-bar" class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+            <div id="progress-handle" class="progress-handle"></div>
+          </div>
+          <span id="duration" class="time">0:00</span>
+        </div>
+      </div>
+      <div class="player-extras">
+        <button id="visualizer-toggle" class="icon-btn" aria-label="Toggle visualizer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+        </button>
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.8" aria-label="Volume">
+      </div>
+    </footer>
+
+    <!-- Audio Visualizer -->
+    <canvas id="visualizer" class="visualizer" hidden></canvas>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div id="modal-content" class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">Modal</h3>
+          <button id="modal-close" class="icon-btn" aria-label="Close modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
