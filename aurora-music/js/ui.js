@@ -926,12 +926,42 @@ class UIController {
     try {
       switch (action) {
         case 'play':
-          this.player.playTrack(track, this.library.getTracks());
+          const currentIndex = this.player.getCurrentIndex();
+          const queue = this.player.audio.queue;
+          const trackId = this.contextTrackId;
+          const trackIndex = queue.findIndex(t => t.id === trackId);
+          
+          if (trackIndex !== -1) {
+            if (trackIndex === currentIndex) {
+              this.player.play();
+            } else if (trackIndex > currentIndex) {
+              const removed = queue.splice(trackIndex, 1)[0];
+              queue.splice(currentIndex + 1, 0, removed);
+              this.player.audio.currentIndex = currentIndex;
+              this.updateQueue();
+              this.player.audio.loadTrack(currentIndex + 1);
+              this.player.audio.play();
+            } else {
+              const removed = queue.splice(trackIndex, 1)[0];
+              queue.splice(currentIndex + 1, 0, removed);
+              this.player.audio.currentIndex = currentIndex;
+              this.updateQueue();
+              this.player.audio.loadTrack(currentIndex + 1);
+              this.player.audio.play();
+            }
+          } else {
+            this.player.playTrack(track, queue.length > 0 ? [...queue] : this.library.getTracks());
+          }
           break;
         case 'queue':
-          this.player.audio.queue.push(track);
-          this.updateQueue();
-          this.showToast('Added to queue', 'success');
+          const exists = this.player.audio.queue.some(t => t.id === track.id);
+          if (!exists) {
+            this.player.audio.queue.push(track);
+            this.updateQueue();
+            this.showToast('Added to queue', 'success');
+          } else {
+            this.showToast('Track already in queue', 'info');
+          }
           break;
         case 'favorite':
           track.favorite = !track.favorite;
