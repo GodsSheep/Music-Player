@@ -193,4 +193,4 @@ class AuroraDB {
   }
 }
 
-export default AuroraDB;
+// AuroraDB ready for use

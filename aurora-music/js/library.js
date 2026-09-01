@@ -266,4 +266,4 @@ class Library {
   }
 }
 
-export default Library;
+// Library ready for use

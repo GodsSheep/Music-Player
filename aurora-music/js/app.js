@@ -114,3 +114,5 @@ document.addEventListener('DOMContentLoaded', () => {
   const app = new AuroraMusicApp();
   app.init();
 });
+
+// AuroraMusicApp ready for use

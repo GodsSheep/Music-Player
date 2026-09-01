@@ -743,4 +743,4 @@ class UIController {
   }
 }
 
-export default UIController;
+// UIController ready for use

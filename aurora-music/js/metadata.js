@@ -419,4 +419,4 @@ class MetadataEngine {
   }
 }
 
-export default MetadataEngine;
+// MetadataEngine ready for use

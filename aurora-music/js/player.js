@@ -204,4 +204,4 @@ class Player {
   }
 }
 
-export default Player;
+// Player ready for use
