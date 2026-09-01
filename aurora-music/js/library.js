@@ -261,6 +261,32 @@ class Library {
     });
   }
 
+  async createPlaylist(name) {
+    const playlist = {
+      id: 'playlist-' + Date.now(),
+      name: name,
+      tracks: [],
+      createdAt: Date.now()
+    };
+    await this.db.savePlaylist(playlist);
+    return playlist;
+  }
+
+  async deletePlaylist(id) {
+    await this.db.deletePlaylist(id);
+  }
+
+  async addTrackToPlaylist(playlistId, track) {
+    const playlist = await this.db.getPlaylist(playlistId);
+    if (playlist) {
+      if (!playlist.tracks) playlist.tracks = [];
+      if (!playlist.tracks.find(t => t.id === track.id)) {
+        playlist.tracks.push(track);
+        await this.db.savePlaylist(playlist);
+      }
+    }
+  }
+
   getTracks() {
     return this.tracks;
   }

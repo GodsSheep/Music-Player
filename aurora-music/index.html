@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#07070c">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Aurora Music">
@@ -56,6 +56,13 @@
             <path d="M12 18H3"/>
           </svg>
           <span>Playlists</span>
+        </a>
+        <a href="#" data-view="settings" class="nav-item" id="nav-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span>Settings</span>
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -178,6 +185,178 @@
             <p>Create a playlist to organize your music</p>
           </div>
         </section>
+
+        <!-- Settings View -->
+        <section id="settings-view" class="view">
+          <div class="view-header">
+            <h1>Settings</h1>
+          </div>
+          <div class="settings-list">
+            <div class="settings-group">
+              <h3 class="settings-group-title">Playback</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Crossfade</div>
+                  <div class="setting-desc">Blend between tracks</div>
+                </div>
+                <div class="setting-control">
+                  <input type="range" id="crossfade-slider" min="0" max="12" step="0.5" value="0" class="setting-slider">
+                  <span id="crossfade-value" class="setting-value">0s</span>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Audio Normalization</div>
+                  <div class="setting-desc">Level playback volume</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="normalize-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Gapless Playback</div>
+                  <div class="setting-desc">Seamless track transitions</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="gapless-toggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="settings-group">
+              <h3 class="settings-group-title">Equalizer</h3>
+              <div class="eq-container">
+                <div class="eq-band" data-band="0">
+                  <input type="range" min="-12" max="12" step="0.5" value="0" class="eq-slider">
+                  <span class="eq-label">60</span>
+                </div>
+                <div class="eq-band" data-band="1">
+                  <input type="range" min="-12" max="12" step="0.5" value="0" class="eq-slider">
+                  <span class="eq-label">230</span>
+                </div>
+                <div class="eq-band" data-band="2">
+                  <input type="range" min="-12" max="12" step="0.5" value="0" class="eq-slider">
+                  <span class="eq-label">1K</span>
+                </div>
+                <div class="eq-band" data-band="3">
+                  <input type="range" min="-12" max="12" step="0.5" value="0" class="eq-slider">
+                  <span class="eq-label">4K</span>
+                </div>
+                <div class="eq-band" data-band="4">
+                  <input type="range" min="-12" max="12" step="0.5" value="0" class="eq-slider">
+                  <span class="eq-label">12K</span>
+                </div>
+              </div>
+              <div class="eq-presets">
+                <button class="btn btn-ghost eq-preset" data-preset="flat">Flat</button>
+                <button class="btn btn-ghost eq-preset" data-preset="bass">Bass</button>
+                <button class="btn btn-ghost eq-preset" data-preset="treble">Treble</button>
+                <button class="btn btn-ghost eq-preset" data-preset="vocal">Vocal</button>
+                <button class="btn btn-ghost eq-preset" data-preset="electronic">Electronic</button>
+              </div>
+            </div>
+            <div class="settings-group">
+              <h3 class="settings-group-title">Now Playing</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Background Style</div>
+                  <div class="setting-desc">Choose now playing wallpaper</div>
+                </div>
+                <select id="wallpaper-select" class="setting-select">
+                  <option value="gradient">Gradient</option>
+                  <option value="artwork">Artwork Blur</option>
+                  <option value="waveform">Live Waveform</option>
+                  <option value="solid">Solid Color</option>
+                  <option value="particles">Particles</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Visualization</div>
+                  <div class="setting-desc">Now playing animation</div>
+                </div>
+                <select id="visualization-select" class="setting-select">
+                  <option value="bars">Bars</option>
+                  <option value="wave">Wave</option>
+                  <option value="circle">Circle</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Show Lyrics</div>
+                  <div class="setting-desc">Display lyrics if available</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="lyrics-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="settings-group">
+              <h3 class="settings-group-title">Appearance</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Theme</div>
+                  <div class="setting-desc">App color scheme</div>
+                </div>
+                <select id="theme-select" class="setting-select">
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
+                  <option value="auto">Auto</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Accent Color</div>
+                  <div class="setting-desc">Primary UI color</div>
+                </div>
+                <div class="color-picker">
+                  <button class="color-option active" data-color="#0a84ff" style="background:#0a84ff"></button>
+                  <button class="color-option" data-color="#bf5af2" style="background:#bf5af2"></button>
+                  <button class="color-option" data-color="#ff375f" style="background:#ff375f"></button>
+                  <button class="color-option" data-color="#30d158" style="background:#30d158"></button>
+                  <button class="color-option" data-color="#ff9500" style="background:#ff9500"></button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Blur Intensity</div>
+                  <div class="setting-desc">Glass effect strength</div>
+                </div>
+                <div class="setting-control">
+                  <input type="range" id="blur-slider" min="0" max="100" step="5" value="60" class="setting-slider">
+                  <span id="blur-value" class="setting-value">60%</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-group">
+              <h3 class="settings-group-title">Audio Output</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Output Device</div>
+                  <div class="setting-desc">Audio playback device</div>
+                </div>
+                <select id="output-select" class="setting-select">
+                  <option value="default">System Default</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Sample Rate</div>
+                  <div class="setting-desc">Audio quality</div>
+                </div>
+                <select id="sample-rate-select" class="setting-select">
+                  <option value="44100">44.1 kHz</option>
+                  <option value="48000">48 kHz</option>
+                  <option value="96000">96 kHz</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
@@ -205,6 +384,100 @@
       <span id="queue-count" class="badge">0</span>
     </button>
 
+    <!-- Now Playing Screen -->
+    <div id="now-playing" class="now-playing hidden">
+      <div id="np-background" class="np-background"></div>
+      <canvas id="np-canvas" class="np-canvas" hidden></canvas>
+      <div class="np-content">
+        <div class="np-header">
+          <button id="np-close" class="icon-btn" aria-label="Close now playing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+          <div class="np-header-info">
+            <div id="np-title" class="np-title">No track selected</div>
+            <div id="np-artist" class="np-artist">-</div>
+          </div>
+          <button id="np-favorite" class="icon-btn" aria-label="Toggle favorite">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="np-artwork-container">
+          <div id="np-artwork" class="np-artwork">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="np-controls">
+          <div class="np-progress">
+            <span id="np-current-time" class="time">0:00</span>
+            <div id="np-progress-bar" class="progress-bar np-progress-bar">
+              <div id="np-progress-fill" class="progress-fill"></div>
+              <div id="np-progress-handle" class="progress-handle"></div>
+            </div>
+            <span id="np-duration" class="time">0:00</span>
+          </div>
+
+          <div class="np-buttons">
+            <button id="np-shuffle-btn" class="icon-btn" aria-label="Shuffle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+              </svg>
+            </button>
+            <button id="np-prev-btn" class="icon-btn" aria-label="Previous">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="19 20 9 12 19 4 19 20"/>
+                <line x1="5" y1="19" x2="5" y2="5"/>
+              </svg>
+            </button>
+            <button id="np-play-btn" class="btn btn-play" aria-label="Play">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16"/>
+                <rect x="14" y="4" width="4" height="16"/>
+              </svg>
+            </button>
+            <button id="np-next-btn" class="icon-btn" aria-label="Next">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 4 15 12 5 20 5 4"/>
+                <line x1="19" y1="5" x2="19" y2="19"/>
+              </svg>
+            </button>
+            <button id="np-repeat-btn" class="icon-btn" aria-label="Repeat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 1l4 4-4 4"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <path d="M7 23l-4-4 4-4"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="np-extras">
+            <button id="np-mix-btn" class="icon-btn" aria-label="Mix" title="Auto-mix">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 18h18M3 12h18M3 6h18"/>
+                <circle cx="8" cy="12" r="2"/>
+                <circle cx="16" cy="6" r="2"/>
+                <circle cx="16" cy="18" r="2"/>
+              </svg>
+            </button>
+            <input type="range" id="np-volume" class="volume-slider" min="0" max="1" step="0.01" value="0.8" aria-label="Volume">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Player Bar -->
     <footer id="player-bar" class="player-bar">
       <div class="player-track">
@@ -222,6 +495,14 @@
         <button id="favorite-btn" class="icon-btn" aria-label="Toggle favorite">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <button id="now-playing-btn" class="icon-btn" aria-label="Now playing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
           </svg>
         </button>
       </div>
@@ -298,6 +579,11 @@
         </div>
         <div id="modal-body" class="modal-body"></div>
       </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+      <div class="context-menu-items"></div>
     </div>
 
     <!-- Toast Notifications -->

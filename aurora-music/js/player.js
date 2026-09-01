@@ -4,9 +4,10 @@
  */
 
 class Player {
-  constructor(audioEngine, db) {
+  constructor(audioEngine, db, library = null) {
     this.audio = audioEngine;
     this.db = db;
+    this.library = library;
     this.currentTrack = null;
     this.currentIndex = -1;
     this.isPlaying = false;
@@ -122,10 +123,14 @@ class Player {
       this.onFavoriteChange(newFavorite);
     }
 
-    // Update in queue as well
     const queueIndex = this.audio.queue.findIndex(t => t.id === this.currentTrack.id);
     if (queueIndex !== -1) {
       this.audio.queue[queueIndex].favorite = newFavorite;
+    }
+
+    const libraryTrack = this.library?.getTracks()?.find(t => t.id === this.currentTrack.id);
+    if (libraryTrack) {
+      libraryTrack.favorite = newFavorite;
     }
   }
 

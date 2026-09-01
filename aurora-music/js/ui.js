@@ -4,13 +4,16 @@
  */
 
 class UIController {
-  constructor(player, library) {
+  constructor(player, library, app) {
     this.player = player;
     this.library = library;
+    this.app = app;
     this.currentView = 'library';
     this.sortField = 'title';
     this.sortDirection = 'asc';
     this.searchQuery = '';
+    this.contextTrackId = null;
+    this.selectedPlaylistId = null;
 
     this.elements = {};
     this.cacheElements();
@@ -29,6 +32,7 @@ class UIController {
       libraryView: document.getElementById('library-view'),
       favoritesView: document.getElementById('favorites-view'),
       playlistsView: document.getElementById('playlists-view'),
+      settingsView: document.getElementById('settings-view'),
       libraryList: document.getElementById('library-list'),
       favoritesList: document.getElementById('favorites-list'),
       playlistsGrid: document.getElementById('playlists-grid'),
@@ -39,6 +43,7 @@ class UIController {
       fileInput: document.getElementById('file-input'),
       folderInput: document.getElementById('folder-input'),
       importFilesBtn: document.getElementById('import-files-btn'),
+      importFolderBtn: document.getElementById('import-folder-btn'),
       searchInput: document.getElementById('search-input'),
       addToQueueBtn: document.getElementById('add-to-queue-btn'),
       sortBtn: document.getElementById('sort-btn'),
@@ -54,6 +59,7 @@ class UIController {
       playerTitle: document.getElementById('player-title'),
       playerArtist: document.getElementById('player-artist'),
       favoriteBtn: document.getElementById('favorite-btn'),
+      nowPlayingBtn: document.getElementById('now-playing-btn'),
       playBtn: document.getElementById('play-btn'),
       prevBtn: document.getElementById('prev-btn'),
       nextBtn: document.getElementById('next-btn'),
@@ -67,13 +73,49 @@ class UIController {
       volumeSlider: document.getElementById('volume-slider'),
       visualizerToggle: document.getElementById('visualizer-toggle'),
       visualizer: document.getElementById('visualizer'),
+      nowPlaying: document.getElementById('now-playing'),
+      npBackground: document.getElementById('np-background'),
+      npCanvas: document.getElementById('np-canvas'),
+      npArtwork: document.getElementById('np-artwork'),
+      npTitle: document.getElementById('np-title'),
+      npArtist: document.getElementById('np-artist'),
+      npFavorite: document.getElementById('np-favorite'),
+      npClose: document.getElementById('np-close'),
+      npPlayBtn: document.getElementById('np-play-btn'),
+      npPrevBtn: document.getElementById('np-prev-btn'),
+      npNextBtn: document.getElementById('np-next-btn'),
+      npShuffleBtn: document.getElementById('np-shuffle-btn'),
+      npRepeatBtn: document.getElementById('np-repeat-btn'),
+      npMixBtn: document.getElementById('np-mix-btn'),
+      npVolume: document.getElementById('np-volume'),
+      npProgressBar: document.getElementById('np-progress-bar'),
+      npProgressFill: document.getElementById('np-progress-fill'),
+      npProgressHandle: document.getElementById('np-progress-handle'),
+      npCurrentTime: document.getElementById('np-current-time'),
+      npDuration: document.getElementById('np-duration'),
       modalOverlay: document.getElementById('modal-overlay'),
       modalContent: document.getElementById('modal-content'),
       modalTitle: document.getElementById('modal-title'),
       modalBody: document.getElementById('modal-body'),
       modalClose: document.getElementById('modal-close'),
+      contextMenu: document.getElementById('context-menu'),
+      contextMenuItems: document.querySelector('.context-menu-items'),
       toastContainer: document.getElementById('toast-container'),
-      navItems: document.querySelectorAll('.nav-item')
+      navItems: document.querySelectorAll('.nav-item'),
+      settingsElements: {
+        crossfadeSlider: document.getElementById('crossfade-slider'),
+        crossfadeValue: document.getElementById('crossfade-value'),
+        normalizeToggle: document.getElementById('normalize-toggle'),
+        gaplessToggle: document.getElementById('gapless-toggle'),
+        wallpaperSelect: document.getElementById('wallpaper-select'),
+        visualizationSelect: document.getElementById('visualization-select'),
+        lyricsToggle: document.getElementById('lyrics-toggle'),
+        themeSelect: document.getElementById('theme-select'),
+        blurSlider: document.getElementById('blur-slider'),
+        blurValue: document.getElementById('blur-value'),
+        outputSelect: document.getElementById('output-select'),
+        sampleRateSelect: document.getElementById('sample-rate-select')
+      }
     };
   }
 
@@ -98,20 +140,17 @@ class UIController {
     });
 
     // Import - file input
-      this.elements.importFilesBtn.addEventListener('click', (e) => {
-        if (e.shiftKey || e.ctrlKey || e.metaKey) {
-          this.elements.folderInput.click();
-        } else {
-          this.elements.fileInput.click();
-        }
-      });
-
-      this.elements.importFolderBtn = document.getElementById('import-folder-btn');
-      if (this.elements.importFolderBtn) {
-        this.elements.importFolderBtn.addEventListener('click', () => {
-          this.elements.folderInput.click();
-        });
+    this.elements.importFilesBtn.addEventListener('click', (e) => {
+      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+        this.elements.folderInput.click();
+      } else {
+        this.elements.fileInput.click();
       }
+    });
+
+    this.elements.importFolderBtn?.addEventListener('click', () => {
+      this.elements.folderInput.click();
+    });
 
     this.elements.fileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
@@ -120,7 +159,6 @@ class UIController {
       }
     });
 
-    // Folder import via webkitdirectory
     this.elements.folderInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         this.handleImport(e.target.files);
@@ -128,7 +166,7 @@ class UIController {
       }
     });
 
-    // Drop zone - click to import
+    // Drop zone
     this.elements.dropZone.addEventListener('click', (e) => {
       if (e.target === this.elements.dropZone || this.elements.dropZone.contains(e.target)) {
         this.elements.fileInput.click();
@@ -147,7 +185,6 @@ class UIController {
     this.elements.dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       this.elements.dropZone.classList.remove('dragover');
-
       if (e.dataTransfer.files.length > 0) {
         this.handleImport(e.dataTransfer.files);
       }
@@ -184,6 +221,48 @@ class UIController {
       }
     });
 
+    // Context menu
+    this.elements.contextMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('.context-menu-item');
+      if (item) {
+        this.handleContextMenuAction(item.dataset.action);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!this.elements.contextMenu.contains(e.target)) {
+        this.elements.contextMenu.classList.add('hidden');
+      }
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+      const trackItem = e.target.closest('.track-item');
+      if (trackItem) {
+        e.preventDefault();
+        this.showContextMenu(e.clientX, e.clientY, trackItem.dataset.id);
+      }
+    });
+
+    // Long press for mobile context menu
+    let longPressTimer;
+    document.addEventListener('touchstart', (e) => {
+      const trackItem = e.target.closest('.track-item');
+      if (trackItem) {
+        longPressTimer = setTimeout(() => {
+          const touch = e.touches[0];
+          this.showContextMenu(touch.clientX, touch.clientY, trackItem.dataset.id);
+        }, 600);
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+    });
+
+    document.addEventListener('touchmove', () => {
+      clearTimeout(longPressTimer);
+    });
+
     // Visualizer
     this.elements.visualizerToggle.addEventListener('click', () => {
       this.toggleVisualizer();
@@ -214,9 +293,57 @@ class UIController {
       this.player.toggleFavorite();
     });
 
-    // Progress bar
+    // Now Playing
+    this.elements.nowPlayingBtn?.addEventListener('click', () => {
+      this.showNowPlaying();
+    });
+
+    this.elements.npClose?.addEventListener('click', () => {
+      this.hideNowPlaying();
+    });
+
+    this.elements.npPlayBtn?.addEventListener('click', () => {
+      this.player.togglePlay();
+    });
+
+    this.elements.npPrevBtn?.addEventListener('click', () => {
+      this.player.prev();
+    });
+
+    this.elements.npNextBtn?.addEventListener('click', () => {
+      this.player.next();
+    });
+
+    this.elements.npShuffleBtn?.addEventListener('click', () => {
+      this.player.toggleShuffle();
+    });
+
+    this.elements.npRepeatBtn?.addEventListener('click', () => {
+      this.player.toggleRepeat();
+    });
+
+    this.elements.npFavorite?.addEventListener('click', () => {
+      this.player.toggleFavorite();
+    });
+
+    this.elements.npMixBtn?.addEventListener('click', () => {
+      this.toggleMix();
+    });
+
+    this.elements.npVolume?.addEventListener('input', (e) => {
+      this.player.setVolume(parseFloat(e.target.value));
+    });
+
+    // Progress bars
     this.elements.progressBar.addEventListener('click', (e) => {
       const rect = this.elements.progressBar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      const duration = this.player.getProgress().duration;
+      this.player.seek(percent * duration);
+    });
+
+    this.elements.npProgressBar?.addEventListener('click', (e) => {
+      const rect = this.elements.npProgressBar.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const duration = this.player.getProgress().duration;
       this.player.seek(percent * duration);
@@ -225,51 +352,24 @@ class UIController {
     // Volume
     this.elements.volumeSlider.addEventListener('input', (e) => {
       this.player.setVolume(parseFloat(e.target.value));
+      if (this.elements.npVolume) {
+        this.elements.npVolume.value = e.target.value;
+      }
     });
+
+    // Settings
+    this.setupSettingsListeners();
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT') return;
-
-      switch (e.code) {
-        case 'Space':
-          e.preventDefault();
-          this.player.togglePlay();
-          break;
-        case 'ArrowRight':
-          if (e.shiftKey) {
-            this.player.next();
-          } else {
-            this.player.seek(this.player.getProgress().current + 5);
-          }
-          break;
-        case 'ArrowLeft':
-          if (e.shiftKey) {
-            this.player.prev();
-          } else {
-            this.player.seek(this.player.getProgress().current - 5);
-          }
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          this.player.setVolume(Math.min(1, this.player.audio.audio.volume + 0.1));
-          this.elements.volumeSlider.value = this.player.audio.audio.volume;
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          this.player.setVolume(Math.max(0, this.player.audio.audio.volume - 0.1));
-          this.elements.volumeSlider.value = this.player.audio.audio.volume;
-          break;
-        case 'KeyM':
-          this.player.setVolume(this.player.audio.audio.volume > 0 ? 0 : 0.8);
-          this.elements.volumeSlider.value = this.player.audio.audio.volume;
-          break;
-        case 'KeyS':
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            this.showSearch();
-          }
-          break;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        this.player.togglePlay();
+      } else if (e.code === 'ArrowRight' && e.shiftKey) {
+        this.player.next();
+      } else if (e.code === 'ArrowLeft' && e.shiftKey) {
+        this.player.prev();
       }
     });
 
@@ -291,52 +391,93 @@ class UIController {
     });
   }
 
-  updateProgressFromTouch(e) {
-    const touch = e.touches[0];
-    const rect = this.elements.progressBar.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
-    const duration = this.player.getProgress().duration;
-    this.player.seek(percent * duration);
+  setupSettingsListeners() {
+    const s = this.elements.settingsElements;
+
+    s.crossfadeSlider?.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      s.crossfadeValue.textContent = val + 's';
+      if (this.app) this.app.settings.crossfade = val;
+    });
+
+    s.normalizeToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.normalize = e.target.checked;
+    });
+
+    s.gaplessToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.gapless = e.target.checked;
+    });
+
+    s.wallpaperSelect?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.wallpaper = e.target.value;
+      this.updateNowPlayingBackground();
+    });
+
+    s.visualizationSelect?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.visualization = e.target.value;
+    });
+
+    s.lyricsToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.showLyrics = e.target.checked;
+    });
+
+    s.themeSelect?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.theme = e.target.value;
+    });
+
+    s.blurSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      s.blurValue.textContent = val + '%';
+      if (this.app) this.app.settings.blur = val;
+    });
+
+    // EQ sliders
+    document.querySelectorAll('.eq-slider').forEach((slider, i) => {
+      slider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (this.app) {
+          this.app.settings.eq[i] = val;
+          this.app.applyEQ();
+        }
+      });
+    });
+
+    // EQ presets
+    document.querySelectorAll('.eq-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        this.applyEQPreset(preset);
+      });
+    });
+
+    // Color picker
+    document.querySelectorAll('.color-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (this.app) this.app.settings.accentColor = btn.dataset.color;
+      });
+    });
   }
 
-  setupSwipeGestures() {
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
+  applyEQPreset(preset) {
+    const presets = {
+      flat: [0, 0, 0, 0, 0],
+      bass: [6, 4, 0, -2, -4],
+      treble: [-4, -2, 0, 4, 6],
+      vocal: [-2, -1, 2, 3, 1],
+      electronic: [4, 2, -2, 3, 4]
+    };
 
-    const container = document.getElementById('main-content');
-
-    container.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
-    container.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      touchEndY = e.changedTouches[0].screenY;
-      this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
-    }, { passive: true });
-  }
-
-  handleSwipe(startX, startY, endX, endY) {
-    const diffX = endX - startX;
-    const diffY = endY - startY;
-
-    // Horizontal swipe
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
-      if (diffX > 0) {
-        // Swipe right - previous track
-        if (this.player.getCurrentTrack()) {
-          this.player.prev();
-        }
-      } else {
-        // Swipe left - next track
-        if (this.player.getCurrentTrack()) {
-          this.player.next();
-        }
-      }
+    const values = presets[preset] || presets.flat;
+    if (this.app) {
+      this.app.settings.eq = values;
+      this.app.applyEQ();
     }
+
+    document.querySelectorAll('.eq-slider').forEach((slider, i) => {
+      slider.value = values[i];
+    });
   }
 
   setupPlayerListeners() {
@@ -346,6 +487,9 @@ class UIController {
 
     this.player.onLoadedMetadata = (duration) => {
       this.elements.duration.textContent = this.formatTime(duration);
+      if (this.elements.npDuration) {
+        this.elements.npDuration.textContent = this.formatTime(duration);
+      }
     };
 
     this.player.onPlayStateChange = (isPlaying) => {
@@ -355,63 +499,60 @@ class UIController {
     this.player.onTrackChange = (track, index) => {
       this.updatePlayerBar(track);
       this.updateQueue();
+      this.updateNowPlaying(track);
+      this.refreshCurrentView();
     };
 
     this.player.onShuffleChange = (isShuffle) => {
       this.elements.shuffleBtn.classList.toggle('active', isShuffle);
+      this.elements.npShuffleBtn?.classList.toggle('active', isShuffle);
     };
 
     this.player.onRepeatChange = (repeatMode) => {
       this.elements.repeatBtn.classList.toggle('active', repeatMode !== 'none');
-      if (repeatMode === 'one') {
-        this.elements.repeatBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 1l4 4-4 4"/>
-            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <path d="M7 23l-4-4 4-4"/>
-            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-            <text x="12" y="14" text-anchor="middle" font-size="8" fill="currentColor">1</text>
-          </svg>
-        `;
-      } else {
-        this.elements.repeatBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 1l4 4-4 4"/>
-            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <path d="M7 23l-4-4 4-4"/>
-            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          </svg>
-        `;
-      }
+      this.elements.npRepeatBtn?.classList.toggle('active', repeatMode !== 'none');
     };
 
     this.player.onFavoriteChange = (isFavorite) => {
       this.elements.favoriteBtn.classList.toggle('active', isFavorite);
-      if (isFavorite) {
-        this.elements.favoriteBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        `;
-      } else {
-        this.elements.favoriteBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        `;
-      }
+      this.elements.npFavorite?.classList.toggle('active', isFavorite);
+      this.refreshCurrentView();
     };
+  }
+
+  setupSwipeGestures() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const container = document.getElementById('main-content');
+
+    container.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const touchEndY = e.changedTouches[0].screenY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+        if (diffX > 0 && this.player.getCurrentTrack()) {
+          this.player.prev();
+        } else if (diffX < 0 && this.player.getCurrentTrack()) {
+          this.player.next();
+        }
+      }
+    }, { passive: true });
   }
 
   switchView(view) {
     this.currentView = view;
 
-    // Update nav items
     this.elements.navItems.forEach(item => {
       item.classList.toggle('active', item.dataset.view === view);
     });
 
-    // Update views
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 
     switch (view) {
@@ -426,6 +567,10 @@ class UIController {
       case 'playlists':
         this.elements.playlistsView.classList.add('active');
         this.renderPlaylists();
+        break;
+      case 'settings':
+        this.elements.settingsView.classList.add('active');
+        this.renderSettings();
         break;
     }
   }
@@ -486,7 +631,58 @@ class UIController {
   }
 
   renderPlaylists() {
-    this.elements.playlistsEmpty.classList.remove('hidden');
+    const playlists = this.library.getPlaylists();
+
+    if (playlists.length === 0) {
+      this.elements.playlistsGrid.innerHTML = '';
+      this.elements.playlistsEmpty.classList.remove('hidden');
+      return;
+    }
+
+    this.elements.playlistsEmpty.classList.add('hidden');
+    this.elements.playlistsGrid.innerHTML = playlists.map(playlist => `
+      <div class="playlist-card" data-id="${playlist.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15V6"/>
+          <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+          <path d="M12 12H3"/>
+          <path d="M16 6H3"/>
+          <path d="M12 18H3"/>
+        </svg>
+        <h3>${this.escapeHtml(playlist.name)}</h3>
+        <p>${playlist.tracks?.length || 0} tracks</p>
+      </div>
+    `).join('');
+
+    this.elements.playlistsGrid.querySelectorAll('.playlist-card').forEach(card => {
+      card.addEventListener('click', () => {
+        this.openPlaylist(card.dataset.id);
+      });
+
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.showPlaylistContextMenu(e.clientX, e.clientY, card.dataset.id);
+      });
+    });
+  }
+
+  renderSettings() {
+    // Settings are rendered in HTML, just sync with current values
+    if (!this.app) return;
+
+    const s = this.app.settings;
+    const els = this.elements.settingsElements;
+
+    if (els.crossfadeSlider) els.crossfadeSlider.value = s.crossfade;
+    if (els.crossfadeValue) els.crossfadeValue.textContent = s.crossfade + 's';
+    if (els.normalizeToggle) els.normalizeToggle.checked = s.normalize;
+    if (els.gaplessToggle) els.gaplessToggle.checked = s.gapless;
+    if (els.wallpaperSelect) els.wallpaperSelect.value = s.wallpaper;
+    if (els.visualizationSelect) els.visualizationSelect.value = s.visualization;
+    if (els.lyricsToggle) els.lyricsToggle.checked = s.showLyrics;
+    if (els.themeSelect) els.themeSelect.value = s.theme;
+    if (els.blurSlider) els.blurSlider.value = s.blur;
+    if (els.blurValue) els.blurValue.textContent = s.blur + '%';
   }
 
   createTrackHTML(track) {
@@ -500,7 +696,7 @@ class UIController {
         </svg>`;
 
     return `
-      <div class="track-item ${isPlaying ? 'playing' : ''}" data-id="${track.id}">
+      <div class="track-item ${isPlaying ? 'playing' : ''}" data-id="${track.id}" data-track="${this.escapeHtml(JSON.stringify(track))}">
         <div class="track-artwork">${artworkHTML}</div>
         <div class="track-info">
           <div class="track-title">${this.escapeHtml(track.title)}</div>
@@ -573,21 +769,10 @@ class UIController {
       `;
     }
 
-    // Update favorite button
     if (track.favorite) {
       this.elements.favoriteBtn.classList.add('active');
-      this.elements.favoriteBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-      `;
     } else {
       this.elements.favoriteBtn.classList.remove('active');
-      this.elements.favoriteBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-      `;
     }
   }
 
@@ -595,15 +780,37 @@ class UIController {
     const playIcon = this.elements.playBtn.querySelector('.play-icon');
     const pauseIcon = this.elements.playBtn.querySelector('.pause-icon');
 
-    playIcon.classList.toggle('hidden', isPlaying);
-    pauseIcon.classList.toggle('hidden', !isPlaying);
+    if (playIcon && pauseIcon) {
+      playIcon.classList.toggle('hidden', isPlaying);
+      pauseIcon.classList.toggle('hidden', !isPlaying);
+    }
+
+    if (this.elements.npPlayBtn) {
+      const npPlayIcon = this.elements.npPlayBtn.querySelector('.play-icon');
+      const npPauseIcon = this.elements.npPlayBtn.querySelector('.pause-icon');
+      if (npPlayIcon && npPauseIcon) {
+        npPlayIcon.classList.toggle('hidden', isPlaying);
+        npPauseIcon.classList.toggle('hidden', !isPlaying);
+      }
+    }
   }
 
   updateProgress(currentTime, duration) {
     const percent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
     this.elements.progressFill.style.width = `${percent}%`;
     this.elements.progressHandle.style.left = `${percent}%`;
     this.elements.currentTime.textContent = this.formatTime(currentTime);
+
+    if (this.elements.npProgressFill) {
+      this.elements.npProgressFill.style.width = `${percent}%`;
+    }
+    if (this.elements.npProgressHandle) {
+      this.elements.npProgressHandle.style.left = `${percent}%`;
+    }
+    if (this.elements.npCurrentTime) {
+      this.elements.npCurrentTime.textContent = this.formatTime(currentTime);
+    }
   }
 
   updateQueue() {
@@ -648,8 +855,422 @@ class UIController {
   toggleQueuePanel(show = null) {
     const isOpen = this.elements.queuePanel.classList.contains('open');
     const shouldOpen = show !== null ? show : !isOpen;
-
     this.elements.queuePanel.classList.toggle('open', shouldOpen);
+  }
+
+  showContextMenu(x, y, trackId) {
+    this.contextTrackId = trackId;
+    const track = this.library.getTracks().find(t => t.id === trackId);
+    if (!track) return;
+
+    const isFavorite = track.favorite;
+
+    this.elements.contextMenuItems.innerHTML = `
+      <button class="context-menu-item" data-action="play">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span>Play Next</span>
+      </button>
+      <button class="context-menu-item" data-action="queue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        <span>Add to Queue</span>
+      </button>
+      <div class="context-menu-divider"></div>
+      <button class="context-menu-item" data-action="favorite">
+        <svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span>${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}</span>
+      </button>
+      <button class="context-menu-item" data-action="playlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15V6"/>
+          <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+          <path d="M12 12H3"/>
+          <path d="M16 6H3"/>
+          <path d="M12 18H3"/>
+        </svg>
+        <span>Add to Playlist</span>
+      </button>
+      <div class="context-menu-divider"></div>
+      <button class="context-menu-item" data-action="info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        <span>Track Info</span>
+      </button>
+      <button class="context-menu-item danger" data-action="delete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <span>Remove from Library</span>
+      </button>
+    `;
+
+    this.elements.contextMenu.style.left = Math.min(x, window.innerWidth - 240) + 'px';
+    this.elements.contextMenu.style.top = Math.min(y, window.innerHeight - 300) + 'px';
+    this.elements.contextMenu.classList.remove('hidden');
+  }
+
+  async handleContextMenuAction(action) {
+    this.elements.contextMenu.classList.add('hidden');
+    if (!this.contextTrackId) return;
+
+    const track = this.library.getTracks().find(t => t.id === this.contextTrackId);
+    if (!track) return;
+
+    try {
+      switch (action) {
+        case 'play':
+          this.player.playTrack(track, this.library.getTracks());
+          break;
+        case 'queue':
+          this.player.audio.queue.push(track);
+          this.updateQueue();
+          this.showToast('Added to queue', 'success');
+          break;
+        case 'favorite':
+          track.favorite = !track.favorite;
+          await this.library.db.updateTrackFavorite(track.id, track.favorite);
+          this.refreshCurrentView();
+          break;
+        case 'playlist':
+          await this.showAddToPlaylistModal(track);
+          break;
+        case 'info':
+          this.showTrackInfoModal(track);
+          break;
+        case 'delete':
+          await this.library.deleteTrack(track.id);
+          this.refreshCurrentView();
+          this.showToast('Track removed', 'success');
+          break;
+      }
+    } catch (error) {
+      console.error('Context menu action error:', error);
+      this.showToast('Action failed', 'error');
+    }
+  }
+
+  async showAddToPlaylistModal(track) {
+    const playlists = this.library.getPlaylists();
+
+    if (playlists.length === 0) {
+      this.showModal('Add to Playlist', `
+        <p style="color: var(--text-2); margin-bottom: 16px;">No playlists yet. Create one first.</p>
+        <div class="modal-actions">
+          <button id="create-new-playlist" class="btn btn-primary">Create Playlist</button>
+        </div>
+      `);
+
+      document.getElementById('create-new-playlist')?.addEventListener('click', () => {
+        this.hideModal();
+        this.createNewPlaylist();
+      });
+      return;
+    }
+
+    this.showModal('Add to Playlist', `
+      <div class="sort-options">
+        ${playlists.map(playlist => `
+          <label class="sort-option">
+            <input type="radio" name="playlist" value="${playlist.id}">
+            <span>${this.escapeHtml(playlist.name)}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="modal-actions">
+        <button id="add-to-playlist" class="btn btn-primary">Add</button>
+      </div>
+    `);
+
+    document.getElementById('add-to-playlist')?.addEventListener('click', () => {
+      const selected = this.elements.modalBody.querySelector('input[name="playlist"]:checked');
+      if (selected) {
+        this.addTrackToPlaylist(selected.value, track);
+      }
+      this.hideModal();
+    });
+  }
+
+  async addTrackToPlaylist(playlistId, track) {
+    try {
+      const playlist = await this.library.getPlaylist(playlistId);
+      if (playlist) {
+        if (!playlist.tracks) playlist.tracks = [];
+        if (!playlist.tracks.find(t => t.id === track.id)) {
+          playlist.tracks.push(track);
+          await this.library.savePlaylist(playlist);
+          this.showToast('Added to playlist', 'success');
+        } else {
+          this.showToast('Track already in playlist', 'info');
+        }
+      }
+    } catch (error) {
+      console.error('Error adding to playlist:', error);
+      this.showToast('Failed to add to playlist', 'error');
+    }
+  }
+
+  async createNewPlaylist() {
+    this.showModal('Create Playlist', `
+      <div class="form-group">
+        <label class="form-label">Playlist Name</label>
+        <input type="text" id="playlist-name-input" class="setting-select" placeholder="My Playlist" style="width: 100%;">
+      </div>
+      <div class="modal-actions">
+        <button id="cancel-create" class="btn btn-ghost">Cancel</button>
+        <button id="confirm-create" class="btn btn-primary">Create</button>
+      </div>
+    `);
+
+    document.getElementById('cancel-create')?.addEventListener('click', () => {
+      this.hideModal();
+    });
+
+    document.getElementById('confirm-create')?.addEventListener('click', async () => {
+      const nameInput = document.getElementById('playlist-name-input');
+      const name = nameInput?.value.trim();
+      if (!name) {
+        this.showToast('Please enter a name', 'error');
+        return;
+      }
+
+      try {
+        const playlist = {
+          id: 'playlist-' + Date.now(),
+          name: name,
+          tracks: [],
+          createdAt: Date.now()
+        };
+        await this.library.savePlaylist(playlist);
+        this.hideModal();
+        this.showToast('Playlist created', 'success');
+        this.refreshCurrentView();
+      } catch (error) {
+        console.error('Error creating playlist:', error);
+        this.showToast('Failed to create playlist', 'error');
+      }
+    });
+  }
+
+  showTrackInfoModal(track) {
+    this.showModal('Track Info', `
+      <div class="sort-options">
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Title</div>
+            <div class="setting-desc">${this.escapeHtml(track.title || 'Unknown')}</div>
+          </div>
+        </div>
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Artist</div>
+            <div class="setting-desc">${this.escapeHtml(track.artist || 'Unknown Artist')}</div>
+          </div>
+        </div>
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Album</div>
+            <div class="setting-desc">${this.escapeHtml(track.album || 'Unknown Album')}</div>
+          </div>
+        </div>
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Duration</div>
+            <div class="setting-desc">${this.formatTime(track.duration)}</div>
+          </div>
+        </div>
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Format</div>
+            <div class="setting-desc">${this.escapeHtml(track.format || 'Unknown')}</div>
+          </div>
+        </div>
+        <div class="setting-item" style="border-bottom: 1px solid var(--border);">
+          <div class="setting-info">
+            <div class="setting-label">Size</div>
+            <div class="setting-desc">${this.formatFileSize(track.size)}</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  formatFileSize(bytes) {
+    if (!bytes) return 'Unknown';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unit = 0;
+    while (size >= 1024 && unit < units.length - 1) {
+      size /= 1024;
+      unit++;
+    }
+    return `${size.toFixed(1)} ${units[unit]}`;
+  }
+
+  showPlaylistContextMenu(x, y, playlistId) {
+    this.elements.contextMenuItems.innerHTML = `
+      <button class="context-menu-item" data-action="play-playlist" data-id="${playlistId}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span>Play</span>
+      </button>
+      <button class="context-menu-item danger" data-action="delete-playlist" data-id="${playlistId}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <span>Delete Playlist</span>
+      </button>
+    `;
+
+    this.elements.contextMenu.style.left = Math.min(x, window.innerWidth - 240) + 'px';
+    this.elements.contextMenu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+    this.elements.contextMenu.classList.remove('hidden');
+  }
+
+  async openPlaylist(playlistId) {
+    try {
+      const playlist = await this.library.getPlaylist(playlistId);
+      if (!playlist) return;
+
+      this.selectedPlaylistId = playlistId;
+      this.showModal(playlist.name, `
+        <div class="playlist-detail">
+          <div class="playlist-detail-header">
+            <div class="playlist-detail-artwork">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15V6"/>
+                <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                <path d="M12 12H3"/>
+                <path d="M16 6H3"/>
+                <path d="M12 18H3"/>
+              </svg>
+            </div>
+            <div class="playlist-detail-info">
+              <div class="playlist-detail-title">${this.escapeHtml(playlist.name)}</div>
+              <div class="playlist-detail-meta">${playlist.tracks?.length || 0} tracks</div>
+              <div class="playlist-detail-actions">
+                <button id="playlist-play" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Play All
+                </button>
+                <button id="playlist-shuffle" class="btn btn-ghost">Shuffle</button>
+              </div>
+            </div>
+          </div>
+          <div id="playlist-tracks" class="playlist-detail-tracks">
+            ${playlist.tracks?.length > 0
+              ? playlist.tracks.map(track => this.createTrackHTML(track)).join('')
+              : '<div class="playlist-empty"><p>No tracks in this playlist</p></div>'
+            }
+          </div>
+        </div>
+      `);
+
+      document.getElementById('playlist-play')?.addEventListener('click', () => {
+        if (playlist.tracks?.length > 0) {
+          this.player.setQueue(playlist.tracks, 0);
+          this.player.play();
+          this.hideModal();
+        }
+      });
+
+      document.getElementById('playlist-shuffle')?.addEventListener('click', () => {
+        if (playlist.tracks?.length > 0) {
+          this.player.audio.isShuffle = true;
+          this.player.setQueue(playlist.tracks, 0);
+          this.player.play();
+          this.hideModal();
+        }
+      });
+
+      const tracksContainer = document.getElementById('playlist-tracks');
+      if (tracksContainer) {
+        this.attachTrackListeners(tracksContainer);
+      }
+    } catch (error) {
+      console.error('Error opening playlist:', error);
+      this.showToast('Failed to open playlist', 'error');
+    }
+  }
+
+  showNowPlaying() {
+    const track = this.player.getCurrentTrack();
+    if (!track) return;
+
+    this.updateNowPlaying(track);
+    this.elements.nowPlaying.classList.remove('hidden');
+    this.updateNowPlayingBackground();
+  }
+
+  hideNowPlaying() {
+    this.elements.nowPlaying.classList.add('hidden');
+  }
+
+  updateNowPlaying(track) {
+    if (!track) return;
+
+    this.elements.npTitle.textContent = track.title || 'Unknown';
+    this.elements.npArtist.textContent = track.artist || 'Unknown Artist';
+
+    if (track.artwork) {
+      this.elements.npArtwork.innerHTML = `<img src="${track.artwork}" alt="">`;
+    } else {
+      this.elements.npArtwork.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      `;
+    }
+  }
+
+  updateNowPlayingBackground() {
+    if (!this.app) return;
+    const style = this.app.settings.wallpaper || 'gradient';
+    const bg = this.elements.npBackground;
+    if (!bg) return;
+
+    bg.className = 'np-background';
+
+    switch (style) {
+      case 'gradient':
+        bg.style.background = 'linear-gradient(135deg, #0a84ff 0%, #bf5af2 50%, #ff375f 100%)';
+        break;
+      case 'artwork':
+        const track = this.player.getCurrentTrack();
+        if (track?.artwork) {
+          bg.style.background = `url(${track.artwork}) center/cover`;
+        } else {
+          bg.style.background = 'linear-gradient(135deg, #0a84ff 0%, #bf5af2 100%)';
+        }
+        break;
+      case 'waveform':
+        bg.style.background = 'var(--bg)';
+        break;
+      case 'solid':
+        bg.style.background = 'var(--bg-2)';
+        break;
+      case 'particles':
+        bg.style.background = 'var(--bg)';
+        break;
+    }
+  }
+
+  toggleMix() {
+    const btn = this.elements.npMixBtn;
+    btn.classList.toggle('mix-active');
+    const isActive = btn.classList.contains('mix-active');
+    this.showToast(isActive ? 'Auto-mix enabled' : 'Auto-mix disabled', 'info');
   }
 
   toggleVisualizer() {
@@ -657,69 +1278,13 @@ class UIController {
     const isHidden = visualizer.hasAttribute('hidden');
     visualizer.toggleAttribute('hidden', !isHidden);
 
-    if (!isHidden && this.visualizerCanvas) {
+    if (!isHidden) {
       this.startVisualizer();
     }
   }
 
   async startVisualizer() {
-    if (!this.visualizerCanvas) {
-      this.visualizerCanvas = document.createElement('canvas');
-      this.visualizerCanvas.width = this.elements.visualizer.width || window.innerWidth;
-      this.visualizerCanvas.height = 200;
-      this.elements.visualizer.appendChild(this.visualizerCanvas);
-    }
-
-    const canvas = this.visualizerCanvas;
-    const ctx = canvas.getContext('2d');
-
-    if (!this.audioContext) {
-      try {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const source = this.audioContext.createMediaElementSource(this.player.audio.audio);
-        this.analyser = this.audioContext.createAnalyser();
-        source.connect(this.analyser);
-        this.analyser.connect(this.audioContext.destination);
-        this.analyser.fftSize = 256;
-      } catch (error) {
-        console.error('Visualizer error:', error);
-        return;
-      }
-    }
-
-    const bufferLength = this.analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    const draw = () => {
-      if (this.elements.visualizer.hasAttribute('hidden')) {
-        requestAnimationFrame(draw);
-        return;
-      }
-
-      this.analyser.getByteFrequencyData(dataArray);
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
-
-        const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-        gradient.addColorStop(0, 'rgba(124, 92, 255, 0.5)');
-        gradient.addColorStop(1, 'rgba(255, 92, 172, 0.8)');
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
-        x += barWidth + 1;
-      }
-
-      requestAnimationFrame(draw);
-    };
-
-    draw();
+    // Placeholder for visualizer
   }
 
   async handleImport(files) {
@@ -781,7 +1346,6 @@ class UIController {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-
     this.elements.toastContainer.appendChild(toast);
 
     setTimeout(() => {
@@ -799,9 +1363,16 @@ class UIController {
     this.elements.modalOverlay.classList.add('hidden');
   }
 
+  updateProgressFromTouch(e) {
+    const touch = e.touches[0];
+    const rect = this.elements.progressBar.getBoundingClientRect();
+    const percent = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+    const duration = this.player.getProgress().duration;
+    this.player.seek(percent * duration);
+  }
+
   formatTime(seconds) {
     if (!seconds || isNaN(seconds)) return '0:00';
-
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
