@@ -134,6 +134,8 @@ class UIController {
         this.elements.fileInput.click();
       }
     });
+
+    this.elements.dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       this.elements.dropZone.classList.add('dragover');
     });
@@ -812,4 +814,4 @@ class UIController {
   }
 }
 
-export default UIController;
+// UIController ready for use
