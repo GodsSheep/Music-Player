@@ -112,12 +112,12 @@ class Player {
     this.audio.toggleRepeat();
   }
 
-  toggleFavorite() {
+  async toggleFavorite() {
     if (!this.currentTrack) return;
 
     const newFavorite = !this.currentTrack.favorite;
     this.currentTrack.favorite = newFavorite;
-    this.db.updateTrackFavorite(this.currentTrack.id, newFavorite);
+    await this.db.updateTrackFavorite(this.currentTrack.id, newFavorite);
 
     if (this.onFavoriteChange) {
       this.onFavoriteChange(newFavorite);
@@ -128,9 +128,11 @@ class Player {
       this.audio.queue[queueIndex].favorite = newFavorite;
     }
 
-    const libraryTrack = this.library?.getTracks()?.find(t => t.id === this.currentTrack.id);
-    if (libraryTrack) {
-      libraryTrack.favorite = newFavorite;
+    if (this.library) {
+      const libraryTrack = this.library.getTracks().find(t => t.id === this.currentTrack.id);
+      if (libraryTrack) {
+        libraryTrack.favorite = newFavorite;
+      }
     }
   }
 

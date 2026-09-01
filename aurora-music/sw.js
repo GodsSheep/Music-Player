@@ -15,7 +15,8 @@ const STATIC_ASSETS = [
   './js/library.js',
   './js/ui.js',
   './js/app.js',
-  './manifest.json'
+  './manifest.json',
+  './icons/icon.svg'
 ];
 
 self.addEventListener('install', (event) => {

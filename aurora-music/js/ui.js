@@ -566,7 +566,7 @@ class UIController {
         break;
       case 'playlists':
         this.elements.playlistsView.classList.add('active');
-        this.renderPlaylists();
+        await this.renderPlaylists();
         break;
       case 'settings':
         this.elements.settingsView.classList.add('active');
@@ -586,7 +586,7 @@ class UIController {
         this.renderFavorites();
         break;
       case 'playlists':
-        this.renderPlaylists();
+        await this.renderPlaylists();
         break;
     }
   }
@@ -630,8 +630,8 @@ class UIController {
     this.attachTrackListeners(this.elements.favoritesList);
   }
 
-  renderPlaylists() {
-    const playlists = this.library.getPlaylists();
+  async renderPlaylists() {
+    const playlists = await this.library.getPlaylists();
 
     if (playlists.length === 0) {
       this.elements.playlistsGrid.innerHTML = '';
@@ -740,6 +740,7 @@ class UIController {
         const newFavorite = !track.favorite;
         track.favorite = newFavorite;
         await this.library.db.updateTrackFavorite(track.id, newFavorite);
+        await this.library.refreshLibrary();
         this.refreshCurrentView();
       });
     });
@@ -966,6 +967,7 @@ class UIController {
         case 'favorite':
           track.favorite = !track.favorite;
           await this.library.db.updateTrackFavorite(track.id, track.favorite);
+          await this.library.refreshLibrary();
           this.refreshCurrentView();
           break;
         case 'playlist':
@@ -987,7 +989,7 @@ class UIController {
   }
 
   async showAddToPlaylistModal(track) {
-    const playlists = this.library.getPlaylists();
+    const playlists = await this.library.getPlaylists();
 
     if (playlists.length === 0) {
       this.showModal('Add to Playlist', `
