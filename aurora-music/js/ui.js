@@ -45,7 +45,9 @@ class UIController {
       importFilesBtn: document.getElementById('import-files-btn'),
       importFolderBtn: document.getElementById('import-folder-btn'),
       searchInput: document.getElementById('search-input'),
+      searchClear: document.getElementById('search-clear'),
       addToQueueBtn: document.getElementById('add-to-queue-btn'),
+      wallpaperToggle: document.getElementById('wallpaper-toggle'),
       sortBtn: document.getElementById('sort-btn'),
       createPlaylistBtn: document.getElementById('create-playlist-btn'),
       queuePanel: document.getElementById('queue-panel'),
@@ -129,7 +131,6 @@ class UIController {
       },
       quickWallpaper: document.getElementById('quick-wallpaper'),
       quickTheme: document.getElementById('quick-theme'),
-      previewUrlBtn: document.getElementById('preview-url-btn'),
       saveSettingsBtn: document.getElementById('save-settings-btn'),
       restoreDefaultsBtn: document.getElementById('restore-defaults-btn')
     };
@@ -209,7 +210,31 @@ class UIController {
     // Search
     this.elements.searchInput.addEventListener('input', (e) => {
       this.searchQuery = e.target.value;
+      this.elements.searchClear.classList.toggle('hidden', !this.searchQuery);
       this.refreshCurrentView();
+    });
+
+    this.elements.searchClear.addEventListener('click', () => {
+      this.searchQuery = '';
+      this.elements.searchInput.value = '';
+      this.elements.searchClear.classList.add('hidden');
+      this.refreshCurrentView();
+      this.elements.searchInput.focus();
+    });
+
+    // Wallpaper toggle from top bar
+    this.elements.wallpaperToggle?.addEventListener('click', () => {
+      const wallpapers = ['gradient', 'artwork', 'waveform', 'solid', 'particles'];
+      const current = this.app?.settings.wallpaper || 'gradient';
+      const next = wallpapers[(wallpapers.indexOf(current) + 1) % wallpapers.length];
+      if (this.app) {
+        this.app.settings.wallpaper = next;
+        const select = document.getElementById('wallpaper-select');
+        if (select) select.value = next;
+        this.updateNowPlayingBackground();
+        this.showToast(`Wallpaper: ${next}`, 'info');
+        this.app.scheduleSaveSettings();
+      }
     });
 
     // Sort
@@ -218,21 +243,7 @@ class UIController {
     });
 
     this.elements.addToQueueBtn.addEventListener('click', () => {
-      const currentQueue = this.player.getQueue();
-      const allTracks = this.library.getTracks();
-      const notInQueue = allTracks.filter(t => !currentQueue.some(q => q.id === t.id));
-      
-      if (notInQueue.length === 0) {
-        this.showToast('All tracks are already in queue', 'info');
-        return;
-      }
-      
-      notInQueue.forEach(track => {
-        currentQueue.push(track);
-      });
-      
-      this.updateQueue();
-      this.showToast(`Added ${notInQueue.length} tracks to queue`, 'success');
+      this.elements.fileInput.click();
     });
     this.elements.queueToggle.addEventListener('click', () => {
       this.toggleQueuePanel();
@@ -575,26 +586,6 @@ class UIController {
         this.showToast(`Theme: ${next}`, 'info');
         save();
       }
-    });
-
-    document.getElementById('preview-url-btn')?.addEventListener('click', () => {
-      if (!this.app) return;
-      const s = this.app.settings;
-      const url = new URL(window.location.href);
-      url.searchParams.set('preview', '1');
-      url.searchParams.set('theme', s.theme);
-      url.searchParams.set('wallpaper', s.wallpaper);
-      url.searchParams.set('visualization', s.visualization);
-      url.searchParams.set('accent', s.accentColor.replace('#', ''));
-      url.searchParams.set('blur', String(s.blur));
-      url.searchParams.set('lyrics', s.showLyrics ? '1' : '0');
-      url.searchParams.set('lyricsSize', String(s.lyricsFontSize));
-      url.searchParams.set('repeat', s.repeatMode);
-      url.searchParams.set('autoNext', s.autoNext ? '1' : '0');
-      url.searchParams.set('shuffle', s.shuffleOnPlay ? '1' : '0');
-      url.searchParams.set('eq', s.eq.join(','));
-      window.open(url.toString(), '_blank');
-      this.showToast('Preview URL opened', 'success');
     });
 
     document.getElementById('save-settings-btn')?.addEventListener('click', async () => {
