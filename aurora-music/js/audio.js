@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Audio Engine
+ * Soniq - Audio Engine
  * Handles audio playback, queue management, shuffle, repeat, and Media Session API
  */
 

@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Metadata Engine
+ * Soniq - Metadata Engine
  * Handles ID3, Vorbis, MP4 metadata and artwork extraction
  */
 

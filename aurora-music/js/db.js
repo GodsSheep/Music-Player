@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Database Module
+ * Soniq - Database Module
  * IndexedDB wrapper with migrations, duplicate detection, and recovery
  */
 

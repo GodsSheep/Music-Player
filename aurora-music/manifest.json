@@ -1,6 +1,6 @@
 {
-  "name": "Aurora Music",
-  "short_name": "Aurora",
+  "name": "Soniq",
+  "short_name": "Soniq",
   "description": "Modern local music player - play your audio files directly in the browser",
   "start_url": "./index.html",
   "display": "standalone",

@@ -1,9 +1,9 @@
 /**
- * Aurora Music - Service Worker
- * Provides offline support and PWA functionality
+ * Soniq - Service Worker
+ * Handles offline caching and PWA functionality
  */
 
-const CACHE_NAME = 'aurora-music-v1';
+const CACHE_NAME = 'soniq-v1';
 const STATIC_ASSETS = [
   './',
   './index.html',

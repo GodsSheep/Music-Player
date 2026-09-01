@@ -1,5 +1,5 @@
 /**
- * Aurora Music - UI Controller
+ * Soniq - UI Controller
  * Handles all DOM interactions, view switching, rendering, and animations
  */
 
@@ -107,12 +107,23 @@ class UIController {
         crossfadeValue: document.getElementById('crossfade-value'),
         normalizeToggle: document.getElementById('normalize-toggle'),
         gaplessToggle: document.getElementById('gapless-toggle'),
+        autoNextToggle: document.getElementById('auto-next-toggle'),
+        repeatModeSelect: document.getElementById('repeat-mode-select'),
+        shuffleToggle: document.getElementById('shuffle-toggle'),
         wallpaperSelect: document.getElementById('wallpaper-select'),
         visualizationSelect: document.getElementById('visualization-select'),
         lyricsToggle: document.getElementById('lyrics-toggle'),
+        lyricsSizeSlider: document.getElementById('lyrics-size-slider'),
+        lyricsSizeValue: document.getElementById('lyrics-size-value'),
         themeSelect: document.getElementById('theme-select'),
         blurSlider: document.getElementById('blur-slider'),
         blurValue: document.getElementById('blur-value'),
+        showQueueToggle: document.getElementById('show-queue-toggle'),
+        showTrackNumberToggle: document.getElementById('show-track-number-toggle'),
+        showAlbumArtToggle: document.getElementById('show-album-art-toggle'),
+        showNotificationToggle: document.getElementById('show-notification-toggle'),
+        notificationTimeoutSlider: document.getElementById('notification-timeout-slider'),
+        notificationTimeoutValue: document.getElementById('notification-timeout-value'),
         outputSelect: document.getElementById('output-select'),
         sampleRateSelect: document.getElementById('sample-rate-select')
       },
@@ -450,6 +461,55 @@ class UIController {
       save();
     });
 
+    s.lyricsSizeSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (s.lyricsSizeValue) s.lyricsSizeValue.textContent = val + 'px';
+      if (this.app) this.app.settings.lyricsFontSize = val;
+      save();
+    });
+
+    s.autoNextToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.autoNext = e.target.checked;
+      save();
+    });
+
+    s.repeatModeSelect?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.repeatMode = e.target.value;
+      save();
+    });
+
+    s.shuffleToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.shuffleOnPlay = e.target.checked;
+      save();
+    });
+
+    s.showQueueToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.showQueue = e.target.checked;
+      save();
+    });
+
+    s.showTrackNumberToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.showTrackNumber = e.target.checked;
+      save();
+    });
+
+    s.showAlbumArtToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.showAlbumArt = e.target.checked;
+      save();
+    });
+
+    s.showNotificationToggle?.addEventListener('change', (e) => {
+      if (this.app) this.app.settings.showNotification = e.target.checked;
+      save();
+    });
+
+    s.notificationTimeoutSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (s.notificationTimeoutValue) s.notificationTimeoutValue.textContent = (val / 1000) + 's';
+      if (this.app) this.app.settings.notificationTimeout = val;
+      save();
+    });
+
     s.themeSelect?.addEventListener('change', (e) => {
       if (this.app) this.app.settings.theme = e.target.value;
       save();
@@ -528,6 +588,10 @@ class UIController {
       url.searchParams.set('accent', s.accentColor.replace('#', ''));
       url.searchParams.set('blur', String(s.blur));
       url.searchParams.set('lyrics', s.showLyrics ? '1' : '0');
+      url.searchParams.set('lyricsSize', String(s.lyricsFontSize));
+      url.searchParams.set('repeat', s.repeatMode);
+      url.searchParams.set('autoNext', s.autoNext ? '1' : '0');
+      url.searchParams.set('shuffle', s.shuffleOnPlay ? '1' : '0');
       url.searchParams.set('eq', s.eq.join(','));
       window.open(url.toString(), '_blank');
       this.showToast('Preview URL opened', 'success');
@@ -546,13 +610,22 @@ class UIController {
         crossfade: 0,
         normalize: false,
         gapless: true,
+        autoNext: true,
+        repeatMode: 'none',
+        shuffleOnPlay: false,
         eq: [0, 0, 0, 0, 0],
         wallpaper: 'gradient',
         visualization: 'bars',
         showLyrics: false,
+        lyricsFontSize: 18,
         theme: 'dark',
         accentColor: '#0a84ff',
         blur: 60,
+        showQueue: true,
+        showTrackNumber: true,
+        showAlbumArt: true,
+        showNotification: true,
+        notificationTimeout: 5000,
         outputDevice: 'default',
         sampleRate: 44100
       };
@@ -789,12 +862,23 @@ class UIController {
     if (els.crossfadeValue) els.crossfadeValue.textContent = s.crossfade + 's';
     if (els.normalizeToggle) els.normalizeToggle.checked = s.normalize;
     if (els.gaplessToggle) els.gaplessToggle.checked = s.gapless;
+    if (els.autoNextToggle) els.autoNextToggle.checked = s.autoNext;
+    if (els.repeatModeSelect) els.repeatModeSelect.value = s.repeatMode;
+    if (els.shuffleToggle) els.shuffleToggle.checked = s.shuffleOnPlay;
     if (els.wallpaperSelect) els.wallpaperSelect.value = s.wallpaper;
     if (els.visualizationSelect) els.visualizationSelect.value = s.visualization;
     if (els.lyricsToggle) els.lyricsToggle.checked = s.showLyrics;
+    if (els.lyricsSizeSlider) els.lyricsSizeSlider.value = s.lyricsFontSize;
+    if (els.lyricsSizeValue) els.lyricsSizeValue.textContent = s.lyricsFontSize + 'px';
     if (els.themeSelect) els.themeSelect.value = s.theme;
     if (els.blurSlider) els.blurSlider.value = s.blur;
     if (els.blurValue) els.blurValue.textContent = s.blur + '%';
+    if (els.showQueueToggle) els.showQueueToggle.checked = s.showQueue;
+    if (els.showTrackNumberToggle) els.showTrackNumberToggle.checked = s.showTrackNumber;
+    if (els.showAlbumArtToggle) els.showAlbumArtToggle.checked = s.showAlbumArt;
+    if (els.showNotificationToggle) els.showNotificationToggle.checked = s.showNotification;
+    if (els.notificationTimeoutSlider) els.notificationTimeoutSlider.value = s.notificationTimeout;
+    if (els.notificationTimeoutValue) els.notificationTimeoutValue.textContent = (s.notificationTimeout / 1000) + 's';
 
     document.querySelectorAll('.eq-slider').forEach((slider, i) => {
       slider.value = s.eq[i] || 0;
@@ -1508,13 +1592,22 @@ class UIController {
   }
 
   showToast(message, type = 'info') {
+    if (this._activeToast) {
+      this._activeToast.remove();
+      clearTimeout(this._toastTimer);
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     this.elements.toastContainer.appendChild(toast);
+    this._activeToast = toast;
 
-    setTimeout(() => {
+    this._toastTimer = setTimeout(() => {
       toast.remove();
+      if (this._activeToast === toast) {
+        this._activeToast = null;
+      }
     }, 3000);
   }
 

@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Player Module
+ * Soniq - Player Module
  * High-level player controller integrating audio engine and UI updates
  */
 

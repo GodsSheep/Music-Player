@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Library Module
+ * Soniq - Library Module
  * Handles track importing, duplicate detection, search, and filtering
  */
 

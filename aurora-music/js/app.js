@@ -1,5 +1,5 @@
 /**
- * Aurora Music - Main Application
+ * Soniq - Main Application
  * Initializes all modules and orchestrates the app lifecycle
  */
 
@@ -15,13 +15,22 @@ class AuroraMusicApp {
       crossfade: 0,
       normalize: false,
       gapless: true,
+      autoNext: true,
+      repeatMode: 'none',
+      shuffleOnPlay: false,
       eq: [0, 0, 0, 0, 0],
       wallpaper: 'gradient',
       visualization: 'bars',
       showLyrics: false,
+      lyricsFontSize: 18,
       theme: 'dark',
       accentColor: '#0a84ff',
       blur: 60,
+      showQueue: true,
+      showTrackNumber: true,
+      showAlbumArt: true,
+      showNotification: true,
+      notificationTimeout: 5000,
       outputDevice: 'default',
       sampleRate: 44100
     };
@@ -86,7 +95,7 @@ class AuroraMusicApp {
       this.player.setVolume(0.8);
       this.ui.elements.volumeSlider.value = 0.8;
 
-      console.log('Aurora Music initialized');
+      console.log('Soniq initialized');
 
     } catch (error) {
       console.error('Failed to initialize app:', error);
@@ -119,6 +128,10 @@ class AuroraMusicApp {
       accent: 'accentColor',
       blur: 'blur',
       lyrics: 'showLyrics',
+      lyricsSize: 'lyricsFontSize',
+      repeat: 'repeatMode',
+      autoNext: 'autoNext',
+      shuffle: 'shuffleOnPlay',
       eq: 'eq'
     };
 
@@ -129,6 +142,12 @@ class AuroraMusicApp {
         if (setting === 'blur') {
           updates[setting] = parseInt(val, 10);
         } else if (setting === 'showLyrics') {
+          updates[setting] = val === '1';
+        } else if (setting === 'lyricsFontSize') {
+          updates[setting] = parseInt(val, 10);
+        } else if (setting === 'autoNext') {
+          updates[setting] = val === '1';
+        } else if (setting === 'shuffleOnPlay') {
           updates[setting] = val === '1';
         } else if (setting === 'eq') {
           updates[setting] = val.split(',').map(Number);
