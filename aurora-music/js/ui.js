@@ -142,14 +142,14 @@ class UIController {
     // Import - file input
     this.elements.importFilesBtn.addEventListener('click', (e) => {
       if (e.shiftKey || e.ctrlKey || e.metaKey) {
-        this.elements.folderInput.click();
+        setTimeout(() => this.elements.folderInput.click(), 50);
       } else {
-        this.elements.fileInput.click();
+        setTimeout(() => this.elements.fileInput.click(), 50);
       }
     });
 
     this.elements.importFolderBtn?.addEventListener('click', () => {
-      this.elements.folderInput.click();
+      setTimeout(() => this.elements.folderInput.click(), 50);
     });
 
     this.elements.fileInput.addEventListener('change', (e) => {
