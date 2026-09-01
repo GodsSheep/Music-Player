@@ -103,6 +103,46 @@ class AuroraMusicApp {
     } catch (error) {
       console.warn('Could not load settings:', error);
     }
+
+    this.applyUrlPreviewSettings();
+  }
+
+  applyUrlPreviewSettings() {
+    const params = new URLSearchParams(window.location.search);
+    const preview = params.get('preview');
+    if (!preview) return;
+
+    const map = {
+      theme: 'theme',
+      wallpaper: 'wallpaper',
+      visualization: 'visualization',
+      accent: 'accentColor',
+      blur: 'blur',
+      lyrics: 'showLyrics',
+      eq: 'eq'
+    };
+
+    const updates = {};
+    for (const [key, setting] of Object.entries(map)) {
+      const val = params.get(key);
+      if (val !== null) {
+        if (setting === 'blur') {
+          updates[setting] = parseInt(val, 10);
+        } else if (setting === 'showLyrics') {
+          updates[setting] = val === '1';
+        } else if (setting === 'eq') {
+          updates[setting] = val.split(',').map(Number);
+        } else if (setting === 'accentColor') {
+          updates[setting] = val.startsWith('#') ? val : `#${val}`;
+        } else {
+          updates[setting] = val;
+        }
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      this.settings = { ...this.settings, ...updates };
+    }
   }
 
   async saveSettings() {

@@ -118,6 +118,7 @@ class UIController {
       },
       quickWallpaper: document.getElementById('quick-wallpaper'),
       quickTheme: document.getElementById('quick-theme'),
+      previewUrlBtn: document.getElementById('preview-url-btn'),
       saveSettingsBtn: document.getElementById('save-settings-btn'),
       restoreDefaultsBtn: document.getElementById('restore-defaults-btn')
     };
@@ -514,6 +515,22 @@ class UIController {
         this.showToast(`Theme: ${next}`, 'info');
         save();
       }
+    });
+
+    document.getElementById('preview-url-btn')?.addEventListener('click', () => {
+      if (!this.app) return;
+      const s = this.app.settings;
+      const url = new URL(window.location.href);
+      url.searchParams.set('preview', '1');
+      url.searchParams.set('theme', s.theme);
+      url.searchParams.set('wallpaper', s.wallpaper);
+      url.searchParams.set('visualization', s.visualization);
+      url.searchParams.set('accent', s.accentColor.replace('#', ''));
+      url.searchParams.set('blur', String(s.blur));
+      url.searchParams.set('lyrics', s.showLyrics ? '1' : '0');
+      url.searchParams.set('eq', s.eq.join(','));
+      window.open(url.toString(), '_blank');
+      this.showToast('Preview URL opened', 'success');
     });
 
     document.getElementById('save-settings-btn')?.addEventListener('click', async () => {
