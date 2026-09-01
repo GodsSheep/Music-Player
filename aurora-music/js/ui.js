@@ -201,7 +201,23 @@ class UIController {
       this.showSortModal();
     });
 
-    // Queue
+    this.elements.addToQueueBtn.addEventListener('click', () => {
+      const currentQueue = this.player.getQueue();
+      const allTracks = this.library.getTracks();
+      const notInQueue = allTracks.filter(t => !currentQueue.some(q => q.id === t.id));
+      
+      if (notInQueue.length === 0) {
+        this.showToast('All tracks are already in queue', 'info');
+        return;
+      }
+      
+      notInQueue.forEach(track => {
+        currentQueue.push(track);
+      });
+      
+      this.updateQueue();
+      this.showToast(`Added ${notInQueue.length} tracks to queue`, 'success');
+    });
     this.elements.queueToggle.addEventListener('click', () => {
       this.toggleQueuePanel();
     });
@@ -523,11 +539,13 @@ class UIController {
   setupSwipeGestures() {
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchStartTime = 0;
     const container = document.getElementById('main-content');
 
     container.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
       touchStartY = e.changedTouches[0].screenY;
+      touchStartTime = Date.now();
     }, { passive: true });
 
     container.addEventListener('touchend', (e) => {
@@ -535,13 +553,20 @@ class UIController {
       const touchEndY = e.changedTouches[0].screenY;
       const diffX = touchEndX - touchStartX;
       const diffY = touchEndY - touchStartY;
+      const elapsed = Date.now() - touchStartTime;
 
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60 && elapsed < 500) {
         if (diffX > 0 && this.player.getCurrentTrack()) {
           this.player.prev();
         } else if (diffX < 0 && this.player.getCurrentTrack()) {
           this.player.next();
         }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches[0].clientX < 40 && !this.elements.sidebar.classList.contains('open')) {
+        this.elements.sidebar.classList.add('open');
       }
     }, { passive: true });
   }
@@ -867,6 +892,13 @@ class UIController {
     const isFavorite = track.favorite;
 
     this.elements.contextMenuItems.innerHTML = `
+      <button class="context-menu-item" data-action="refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
       <button class="context-menu-item" data-action="play">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
@@ -926,6 +958,11 @@ class UIController {
 
     try {
       switch (action) {
+        case 'refresh':
+          await this.library.refreshLibrary();
+          this.refreshCurrentView();
+          this.showToast('Library refreshed', 'success');
+          break;
         case 'play':
           const currentIndex = this.player.getCurrentIndex();
           const queue = this.player.audio.queue;
@@ -978,6 +1015,7 @@ class UIController {
           break;
         case 'delete':
           await this.library.deleteTrack(track.id);
+          await this.library.refreshLibrary();
           this.refreshCurrentView();
           this.showToast('Track removed', 'success');
           break;

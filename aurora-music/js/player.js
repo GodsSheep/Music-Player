@@ -100,6 +100,10 @@ class Player {
     this.audio.seek(time);
   }
 
+  setQueue(tracks, startIndex = 0) {
+    this.audio.setQueue(tracks, startIndex);
+  }
+
   setVolume(value) {
     this.audio.setVolume(value);
   }

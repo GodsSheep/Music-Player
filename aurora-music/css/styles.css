@@ -1172,6 +1172,123 @@ button { font-family: inherit; font-size: inherit; }
     left: 12px;
     width: auto;
   }
+
+  .track-item { padding: 10px 12px; gap: 12px; }
+  .track-artwork { width: 44px; height: 44px; }
+  .track-title { font-size: 0.9rem; }
+  .track-artist { font-size: 0.8rem; }
+  .track-duration { font-size: 0.78rem; min-width: 36px; }
+  .track-actions .icon-btn { width: 30px; height: 30px; }
+  .track-actions .icon-btn svg { width: 14px; height: 14px; }
+
+  .playlists-grid { grid-template-columns: 1fr; }
+  .playlist-card { padding: 18px; }
+  .playlist-card svg { width: 40px; height: 40px; }
+
+  .btn { padding: 10px 18px; font-size: 0.88rem; }
+  .icon-btn { width: 40px; height: 40px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  .np-buttons .icon-btn { width: 44px; height: 44px; }
+  .np-buttons .icon-btn svg { width: 20px; height: 20px; }
+  .np-buttons .btn-play { width: 60px; height: 60px; }
+  .np-buttons .btn-play svg { width: 22px; height: 22px; }
+  .np-extras .volume-slider { width: 100px; }
+
+  .settings-list { max-height: calc(100vh - var(--player) - var(--safe-bottom) - 100px); }
+  .setting-item { padding: 12px 0; }
+  .setting-label { font-size: 0.9rem; }
+  .setting-desc { font-size: 0.78rem; }
+  .setting-slider { width: 100px; }
+  .setting-select { min-width: 120px; font-size: 0.85rem; }
+
+  .eq-container { height: 140px; }
+  .eq-slider { height: 100px; }
+
+  .modal-content { margin: 20px; max-height: calc(100vh - 40px); }
+}
+
+@media (max-width: 480px) {
+  .top-bar { padding: 0 14px; height: 60px; gap: 10px; }
+  #views-container { padding: 14px; padding-bottom: calc(var(--player) + var(--safe-bottom) + 14px); }
+  .view-header h1 { font-size: 1.5rem; }
+  .search-box input { font-size: 0.88rem; padding: 10px 14px 10px 36px; }
+  .search-box svg { left: 12px; width: 14px; height: 14px; }
+
+  .track-item { padding: 10px; gap: 10px; }
+  .track-artwork { width: 40px; height: 40px; }
+  .track-title { font-size: 0.88rem; }
+  .track-artist { font-size: 0.78rem; }
+  .track-duration { font-size: 0.75rem; min-width: 32px; }
+  .track-actions .icon-btn { width: 28px; height: 28px; }
+  .track-actions .icon-btn svg { width: 13px; height: 13px; }
+
+  .btn { padding: 8px 14px; font-size: 0.82rem; border-radius: 10px; }
+  .icon-btn { width: 36px; height: 36px; }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .player-track { padding: 8px 14px; gap: 10px; }
+  .player-artwork { width: 40px; height: 40px; }
+  .player-title { font-size: 0.88rem; }
+  .player-artist { font-size: 0.78rem; }
+  .player-controls { padding: 0 14px 8px; }
+  .player-buttons { gap: 6px; }
+  .btn-play { width: 44px; height: 44px; }
+  .btn-play svg { width: 18px; height: 18px; }
+  .player-progress { gap: 10px; }
+  .time { font-size: 0.72rem; width: 36px; }
+  .progress-bar { height: 4px; }
+  .progress-handle { width: 12px; height: 12px; }
+  .player-extras { right: 14px; top: 8px; }
+  .volume-slider { width: 70px; }
+
+  .queue-panel { width: 100%; }
+  .queue-header { padding: 16px; }
+  .queue-header h2 { font-size: 1.1rem; }
+  .queue-item { padding: 10px; gap: 10px; }
+
+  .np-content { padding: 16px; padding-top: calc(16px + var(--safe-top)); padding-bottom: calc(16px + var(--safe-bottom)); }
+  .np-artwork { width: min(220px, 65vw); height: min(220px, 65vw); }
+  .np-buttons { gap: 10px; }
+  .np-buttons .icon-btn { width: 40px; height: 40px; }
+  .np-buttons .icon-btn svg { width: 18px; height: 18px; }
+  .np-buttons .btn-play { width: 52px; height: 52px; }
+  .np-buttons .btn-play svg { width: 20px; height: 20px; }
+  .np-extras .volume-slider { width: 80px; }
+  .np-progress { gap: 10px; }
+
+  .playlist-detail-header { padding: 16px; gap: 12px; }
+  .playlist-detail-artwork { width: 80px; height: 80px; }
+  .playlist-detail-title { font-size: 1.1rem; }
+  .playlist-detail-meta { font-size: 0.82rem; }
+  .playlist-detail-actions { flex-direction: column; }
+  .playlist-detail-actions .btn { width: 100%; }
+
+  .settings-list { max-height: calc(100vh - var(--player) - var(--safe-bottom) - 80px); }
+  .setting-item { padding: 10px 0; gap: 12px; }
+  .setting-label { font-size: 0.85rem; }
+  .setting-desc { font-size: 0.75rem; }
+  .setting-slider { width: 80px; }
+  .setting-select { min-width: 100px; font-size: 0.82rem; padding: 6px 10px; }
+  .settings-group { padding: 16px; }
+
+  .eq-container { height: 120px; }
+  .eq-slider { height: 80px; }
+  .eq-band { gap: 4px; }
+  .eq-label { font-size: 0.7rem; }
+
+  .context-menu { min-width: 180px; max-width: calc(100vw - 32px); }
+  .context-menu-item { padding: 10px 12px; font-size: 0.85rem; }
+
+  .modal-content { margin: 12px; max-height: calc(100vh - 24px); }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 16px; }
+
+  .drop-zone { padding: 40px 16px; }
+  .drop-zone-content svg { width: 40px; height: 40px; }
+  .drop-zone-content p { font-size: 0.9rem; }
+  .empty-state { padding: 48px 16px; }
+  .empty-state svg { width: 48px; height: 48px; }
 }
 
 @media (min-width: 769px) {
